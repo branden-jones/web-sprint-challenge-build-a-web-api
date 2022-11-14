@@ -82,6 +82,41 @@ server.post('/api/projects', (req,res, next) => {
     }
 })
 
+server.put('/api/projects/:id', async (req,res,next) => {
+    const { id } = req.params;
+    const { name, description, completed } = req.body;
+    try{
+        const idCheck = await Projects.get(id)
+        if(idCheck){
+            if( !name || !description ){
+                res.status(400).json({
+                    message: 'Either Name and Desciption required'
+                })
+            }
+            else{
+                Projects.update(id, req.body)
+                    .then(proj => {
+                        res.status(200).json(proj)
+                    })
+                    .catch(err => {
+                        next(err)
+                    })
+            }
+        }
+        else {
+            res.status(404).json({
+                message: 'Id required'
+            })
+        }
+    }
+    catch(err){
+        next(err)
+    }
+})
+
+
+// ****  Fall Back Error Message  ****
+
 server.use('/', (err,req,res, next) => {
     res.status(500).json({
         message: "Our Bad... Something on our end is messed up",
