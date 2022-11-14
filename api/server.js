@@ -74,19 +74,10 @@ server.put('/api/projects/:id', validateProjectId, checkForValidUpdate, async (r
     }
 })
 
-server.delete('/api/projects/:id', async (req,res,next) => {
-    const { id } = req.params;
-    const idCheck = await Projects.get(id);
+server.delete('/api/projects/:id', validateProjectId, async (req,res,next) => {
     try{ 
-        if(idCheck){
-            const deletedItem = await Projects.remove(id)
-            res.status(200).json(deletedItem)
-        }
-        else{
-            res.status(404).json({
-                message: `Invalid Id: Could not Delete/Find Project with Id: ${id}`
-            })
-        }
+        const deletedItem = await Projects.remove(req.params.id)
+        res.status(200).json(deletedItem)
     }
     catch(err){
         next(err)
