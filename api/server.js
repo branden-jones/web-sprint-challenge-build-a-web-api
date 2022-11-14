@@ -59,26 +59,34 @@ server.get('/api/projects/:id', (req,res) => {
     }
 })
 
-// server.post('/api/projects', (req,res) => {
-//     try{
-//         Projects.insert()
-//             .then(results => {
-//                 console.log(results)
-//             })
-//             .catch(err => console.log(err))
-//     }
-//     catch(err){
-//         res.status(500).json({
-//             message: "Our Bad... Something on our end is messed up",
-//             err: err.message,
-//             stack: err.stack 
-//         })
-//     }
-// })
+server.post('/api/projects', (req,res, next) => {
+    const { name, description } = req.body
+    try{
+        if( !name || !description ){
+            res.status(400).json({
+                message: "Need both name and description"
+            })
+        }
+        else{
+            Projects.insert(req.body)
+                .then(proj => {
+                    res.status(201).json(proj)
+                })
+                .catch(err => 
+                    next(err)
+                )
+        }
+    }
+    catch(err){
+        next()
+    }
+})
 
-server.use('/', (req,res) => {
-    res.status(404).json({
-        message: "Not Found"
+server.use('/', (err,req,res, next) => {
+    res.status(500).json({
+        message: "Our Bad... Something on our end is messed up",
+        err: err.message,
+        stack: err.stack 
     })
 })
 
