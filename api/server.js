@@ -23,7 +23,7 @@ server.get('/api/projects', (req,res) => {
             })
 })
 
-server.get('/api/projects/:id', (req,res) => {
+server.get('/api/projects/:id', (req,res, next) => {
     const { id } = req.params;
     console.log(id)
     try {        
@@ -51,11 +51,7 @@ server.get('/api/projects/:id', (req,res) => {
         }
     }
     catch(err){
-        res.status(500).json({
-            message: "Our Bad... Something on our end is messed up",
-            err: err.message,
-            stack: err.stack 
-        })
+        next(err)
     }
 })
 
@@ -133,11 +129,28 @@ server.delete('/api/projects/:id', async (req,res,next) => {
     }
 })
 
-
+server.get('/api/projects/:id/actions', async (req,res, next) => {
+    const { id } = req.params;
+    const idCheck = await Projects.get(id)
+    try {        
+        if(idCheck){
+            const actions = await Projects.getProjectActions(id);
+            res.json(actions)
+        }
+        else{
+            res.status(404).json({
+                message: "Invalid Id"
+            })
+        }
+    }
+    catch(err){
+        next(err)
+    }
+})
 
 // ****  Fall Back Error Message  ****
 
-server.use('/', (err,req,res, next) => {
+server.use((err,req,res, next) => { //eslint-disable-line
     res.status(500).json({
         message: "Our Bad... Something on our end is messed up",
         err: err.message,
