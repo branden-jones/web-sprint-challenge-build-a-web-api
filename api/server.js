@@ -105,7 +105,7 @@ server.put('/api/projects/:id', async (req,res,next) => {
         }
         else {
             res.status(404).json({
-                message: 'Id required'
+                message: 'Valid Id required'
             })
         }
     }
@@ -113,6 +113,26 @@ server.put('/api/projects/:id', async (req,res,next) => {
         next(err)
     }
 })
+
+server.delete('/api/projects/:id', async (req,res,next) => {
+    const { id } = req.params;
+    const idCheck = await Projects.get(id);
+    try{ 
+        if(idCheck){
+            const deletedItem = await Projects.remove(id)
+            res.status(200).json(deletedItem)
+        }
+        else{
+            res.status(404).json({
+                message: `Invalid Id: Could not Delete/Find Project with Id: ${id}`
+            })
+        }
+    }
+    catch(err){
+        next(err)
+    }
+})
+
 
 
 // ****  Fall Back Error Message  ****
@@ -127,4 +147,3 @@ server.use('/', (err,req,res, next) => {
 
 module.exports = server;
 
-// {throw new Error(`NOOOOOO`)}
