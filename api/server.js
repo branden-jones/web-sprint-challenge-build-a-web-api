@@ -1,6 +1,13 @@
 const express = require('express');
+const { 
+    logger,
+    validateProjectId,
+    checkForValidUpdate,
+    } = require('./projects/projects-middleware');
 const server = express();
+
 server.use(express.json())
+server.use(logger)
 
 const Projects = require('./projects/projects-model');
 
@@ -23,36 +30,15 @@ server.get('/api/projects', (req,res) => {
             })
 })
 
-server.get('/api/projects/:id', (req,res, next) => {
-    const { id } = req.params;
-    console.log(id)
-    try {        
-        if(id) {
-            Projects.get(id)
-                .then(proj => {
-                    res.status(200).json({
-                        id: proj.id,
-                        name: proj.name,
-                        description: proj.description,
-                        completed: proj.completed
-                    })
-                })
-                .catch(err => {
-                    res.status(404).json({
-                        message: "Id does not exist",
-                        err: err.message
-                    })
-            })
-        }
-        else {
-            res.status(404).json({
-                message: "Invalid Id"
-            })
-        }
-    }
-    catch(err){
-        next(err)
-    }
+server.get('/api/projects/:id', validateProjectId, (req,res) => {
+    const { completed, actions, description, id, name } = req.proj;
+    res.status(200).json({
+        id: id,
+        name: name,
+        description: description,
+        actions: actions.length,
+        completed: completed
+    });
 })
 
 server.post('/api/projects', (req,res, next) => {
@@ -78,32 +64,10 @@ server.post('/api/projects', (req,res, next) => {
     }
 })
 
-server.put('/api/projects/:id', async (req,res,next) => {
-    const { id } = req.params;
-    const { name, description, completed } = req.body;
+server.put('/api/projects/:id', validateProjectId, checkForValidUpdate, async (req,res,next) => {
     try{
-        const idCheck = await Projects.get(id)
-        if(idCheck){
-            if( !name || !description ){
-                res.status(400).json({
-                    message: 'Either Name and Desciption required'
-                })
-            }
-            else{
-                Projects.update(id, req.body)
-                    .then(proj => {
-                        res.status(200).json(proj)
-                    })
-                    .catch(err => {
-                        next(err)
-                    })
-            }
-        }
-        else {
-            res.status(404).json({
-                message: 'Valid Id required'
-            })
-        }
+        const updatedProj = await Projects.update(req.params.id, req.body)
+        res.status(200).json(updatedProj)
     }
     catch(err){
         next(err)
@@ -151,9 +115,8 @@ server.get('/api/projects/:id/actions', async (req,res, next) => {
 // ****  Fall Back Error Message  ****
 
 server.use((err,req,res, next) => { //eslint-disable-line
-    res.status(500).json({
-        message: "Our Bad... Something on our end is messed up",
-        err: err.message,
+    res.status(err.status || 500).json({
+        message: err.message,
         stack: err.stack 
     })
 })
