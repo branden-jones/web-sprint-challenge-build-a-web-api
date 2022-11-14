@@ -84,19 +84,10 @@ server.delete('/api/projects/:id', validateProjectId, async (req,res,next) => {
     }
 })
 
-server.get('/api/projects/:id/actions', async (req,res, next) => {
-    const { id } = req.params;
-    const idCheck = await Projects.get(id)
+server.get('/api/projects/:id/actions', validateProjectId, async (req,res, next) => {
     try {        
-        if(idCheck){
-            const actions = await Projects.getProjectActions(id);
+            const actions = await Projects.getProjectActions(req.params.id);
             res.json(actions)
-        }
-        else{
-            res.status(404).json({
-                message: "Invalid Id"
-            })
-        }
     }
     catch(err){
         next(err)
