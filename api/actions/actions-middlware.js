@@ -1,6 +1,7 @@
 // add middlewares here related to actions
 
 const Action = require('./actions-model');
+const Project = require('../projects/projects-model')
 
 async function validateActionId(req,res,next){
     const { id } = req.params;
@@ -12,16 +13,48 @@ async function validateActionId(req,res,next){
         })
     }
     else{
-        res.json(action)
+        req.body = action
         next();
     }
 }
 
-async function checkForProperUpdates (req,res,next){
+async function validProjectId(req,res,next){
+    const { project_id, notes, description }= req.body
+    const project = await Project.get(project_id)
+    if(project){
+        req.body = {
+            project_id: project_id,
+            notes: notes,
+            description: description
+        };
+        next()
+    }
+    else{
+        next({
+            status: 400,
+            message: "Valid Project Id is required"
+        })
+    }
+}
 
+async function checkForProperFormat (req,res,next){
+    const { description, notes } = req.body;
+    if (!notes ||
+        !notes.trim() ||
+        !description ||
+        !description.trim()){
+            next({
+                status: 400,
+                message: "Notes and Description are required"
+            })
+        }
+    else {
+        next()
+    }
 }
 
 module.exports = {
     validateActionId,
-    checkForProperUpdates
+    checkForProperFormat,
+    validProjectId
 }

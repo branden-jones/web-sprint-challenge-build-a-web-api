@@ -24,7 +24,7 @@ function logger(req, res, next) {
     }
   }
 
-  async function checkForValidUpdate (req,res,next){
+function checkForValidUpdate (req,res,next){
     const { name, description, completed } = req.body;
     if( !name || 
         !name.trim() || 
