@@ -26,14 +26,17 @@ function logger(req, res, next) {
 
   async function checkForValidUpdate (req,res,next){
     const { name, description, completed } = req.body;
-    if( !name || !name.trim() || !description || !description.trim() ) {
+    if( !name || 
+        !name.trim() || 
+        !description || 
+        !description.trim() || 
+        completed === undefined ) {
         next({
             status: 400,
             message: "Valid Name and Description required"
         })
     }
     else {
-        console.log(`middleware`,req.body)
         req.body = {
             name: name.trim(),
             description: description.trim(),

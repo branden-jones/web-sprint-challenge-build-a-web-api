@@ -64,7 +64,6 @@ router.post('/', (req,res, next) => {
 router.put('/:id', validateProjectId, checkForValidUpdate, async (req,res,next) => {
     try{
         const updatedProj = await Projects.update(req.params.id, req.body)
-        console.log(`router`,updatedProj)
         res.status(200).json(updatedProj)
     }
     catch(err){

@@ -1,6 +1,9 @@
 // Write your "actions" router here!
 const express = require('express');
-const { /** Middleware for actions */} = require('./actions-middlware');
+const {
+    validateActionId,
+    checkForProperUpdates
+} = require('./actions-middlware');
 const Action = require('./actions-model');
 const router = express.Router();
 
@@ -15,8 +18,13 @@ router.get('/', (req, res, next) => {
         })
 })
 
-router.get('/:id', (req,res) => {
-    console.log(`get with id`)
+router.get('/:id', validateActionId, (req, res, next) => {
+    // try{
+        
+    // }
+    // catch(err){
+    //     next(err);
+    // }
 })
 
 router.post('/', (req,res) => {
